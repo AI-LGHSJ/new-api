@@ -174,6 +174,10 @@ export function getMinTopupAmount(topupInfo: TopupInfo | null): number {
     return topupInfo.min_topup
   }
 
+  if (topupInfo.enable_wechat_topup) {
+    return topupInfo.min_topup
+  }
+
   if (topupInfo.enable_stripe_topup) {
     return topupInfo.stripe_min_topup
   }
