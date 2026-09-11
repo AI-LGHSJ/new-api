@@ -16,11 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { ConfigDrawer } from '@/components/config-drawer'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
+import { InfiniteCanvasDialog } from '@/features/infinite-canvas/components/infinite-canvas-dialog'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 
@@ -109,6 +113,8 @@ export function AppHeader({
 
   // Notifications hook
   const notifications = useNotifications()
+  const { t } = useTranslation()
+  const [infiniteCanvasOpen, setInfiniteCanvasOpen] = useState(false)
 
   return (
     <>
@@ -126,6 +132,13 @@ export function AppHeader({
                 <TopNav links={links} />
               </div>
             )}
+            <button
+              type='button'
+              onClick={() => setInfiniteCanvasOpen(true)}
+              className='hover:text-primary hidden text-sm font-medium transition-colors text-muted-foreground lg:block'
+            >
+              {t('无限画布')}
+            </button>
             {showSearch && <Search />}
             {showNotifications && (
               <NotificationPopover
@@ -145,6 +158,11 @@ export function AppHeader({
           </div>
         )}
       </Header>
+
+      <InfiniteCanvasDialog
+        open={infiniteCanvasOpen}
+        onOpenChange={setInfiniteCanvasOpen}
+      />
     </>
   )
 }

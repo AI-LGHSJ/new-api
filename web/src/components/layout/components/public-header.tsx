@@ -27,6 +27,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { InfiniteCanvasDialog } from '@/features/infinite-canvas/components/infinite-canvas-dialog'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
@@ -81,6 +82,7 @@ export function PublicHeader(props: PublicHeaderProps) {
     useState<AuthPromptTarget | null>(null)
   const [authPromptSecondsLeft, setAuthPromptSecondsLeft] =
     useState(AUTH_PROMPT_SECONDS)
+  const [infiniteCanvasOpen, setInfiniteCanvasOpen] = useState(false)
   const { auth } = useAuthStore()
   const {
     systemName,
@@ -173,6 +175,14 @@ export function PublicHeader(props: PublicHeaderProps) {
     [t]
   )
 
+  const handleInfiniteCanvasClick = useCallback(() => {
+    if (!isAuthenticated) {
+      navigate({ to: '/sign-in', search: { redirect: '/' } })
+      return
+    }
+    setInfiniteCanvasOpen(true)
+  }, [isAuthenticated, navigate])
+
   return (
     <>
       <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
@@ -255,6 +265,14 @@ export function PublicHeader(props: PublicHeaderProps) {
                   </Link>
                 )
               })}
+
+              <button
+                type='button'
+                onClick={handleInfiniteCanvasClick}
+                className='text-muted-foreground hover:text-foreground rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200'
+              >
+                {t('无限画布')}
+              </button>
 
               {(showLanguageSwitcher ||
                 showThemeSwitch ||
@@ -391,6 +409,25 @@ export function PublicHeader(props: PublicHeaderProps) {
                 </Link>
               )
             })}
+            <button
+              type='button'
+              onClick={() => {
+                handleInfiniteCanvasClick()
+                setMobileOpen(false)
+              }}
+              className={cn(
+                'flex items-center gap-3 py-3 text-base font-medium tracking-tight transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                mobileOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+                'text-muted-foreground'
+              )}
+              style={{
+                transitionDelay: mobileOpen
+                  ? `${100 + links.length * 50}ms`
+                  : '0ms',
+              }}
+            >
+              {t('无限画布')}
+            </button>
           </nav>
 
           <div
@@ -443,6 +480,11 @@ export function PublicHeader(props: PublicHeaderProps) {
           })}
         </div>
       </Dialog>
+
+      <InfiniteCanvasDialog
+        open={infiniteCanvasOpen}
+        onOpenChange={setInfiniteCanvasOpen}
+      />
     </>
   )
 }
