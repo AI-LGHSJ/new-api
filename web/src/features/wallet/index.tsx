@@ -28,6 +28,7 @@ import { AffiliateRewardsCard } from './components/affiliate-rewards-card'
 import { BillingHistoryDialog } from './components/dialogs/billing-history-dialog'
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
+import { WechatQrCodeDialog } from './components/dialogs/wechat-qrcode-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
@@ -46,6 +47,7 @@ import {
   getDefaultPaymentType,
   getMinTopupAmount,
   dispatchSelectedPayment,
+  isWechatPayment,
 } from './lib'
 import type {
   UserWalletData,
@@ -94,8 +96,11 @@ export function Wallet(props: WalletProps) {
     amount: paymentAmount,
     calculating,
     processing,
+    wechatPayment,
     calculatePaymentAmount,
     processPayment,
+    processWechatPayment,
+    clearWechatPayment,
   } = usePayment()
   const {
     affiliateLink,
@@ -202,12 +207,15 @@ export function Wallet(props: WalletProps) {
         regular: processPayment,
         waffo: processWaffoPayment,
         waffoPancake: processWaffoPancakePayment,
+        wechat: (amount) => processWechatPayment(amount),
       }
     )
 
     if (success) {
       setConfirmDialogOpen(false)
-      await fetchUser()
+      if (!isWechatPayment(selectedPaymentMethod.type)) {
+        await fetchUser()
+      }
     }
   }
 
@@ -385,6 +393,20 @@ export function Wallet(props: WalletProps) {
         product={selectedCreemProduct}
         processing={creemProcessing}
       />
+
+      {wechatPayment?.code_url ? (
+        <WechatQrCodeDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) clearWechatPayment()
+          }}
+          codeUrl={wechatPayment.code_url}
+          tradeNo={wechatPayment.trade_no}
+          onPaid={() => {
+            void fetchUser()
+          }}
+        />
+      ) : null}
     </>
   )
 }

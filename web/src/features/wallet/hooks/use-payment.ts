@@ -29,6 +29,7 @@ import {
   calculateWaffoPancakeAmount,
   requestPayment,
   requestStripePayment,
+  requestWechatPayment,
   isApiSuccess,
 } from '../api'
 import {
@@ -37,7 +38,11 @@ import {
   isWaffoPancakePayment,
   submitPaymentForm,
 } from '../lib'
-import type { AmountRequest, AmountResponse } from '../types'
+import type {
+  AmountRequest,
+  AmountResponse,
+  WechatPaymentResponse,
+} from '../types'
 
 // ============================================================================
 // Payment Hook
@@ -85,6 +90,8 @@ export function usePayment() {
   const [amount, setAmount] = useState<number>(0)
   const [calculating, setCalculating] = useState(false)
   const [processing, setProcessing] = useState(false)
+  const [wechatPayment, setWechatPayment] =
+    useState<WechatPaymentResponse['data'] | null>(null)
 
   // Calculate payment amount
   const calculatePaymentAmount = useCallback(
@@ -159,12 +166,48 @@ export function usePayment() {
     []
   )
 
+  // Process WeChat Native payment -> returns code_url for QR dialog
+  const processWechatPayment = useCallback(
+    async (topupAmount: number) => {
+      try {
+        setProcessing(true)
+        const amount = Math.floor(topupAmount)
+        const response = await requestWechatPayment({
+          amount,
+          payment_method: 'wechat',
+        })
+
+        if (!isApiSuccess(response) || !response.data?.code_url) {
+          handleServerError(response, i18next.t('Payment request failed'))
+          return false
+        }
+
+        setWechatPayment({
+          code_url: response.data.code_url,
+          trade_no: response.data.trade_no,
+        })
+        return true
+      } catch (error) {
+        handleServerError(error, i18next.t('Payment request failed'))
+        return false
+      } finally {
+        setProcessing(false)
+      }
+    },
+    []
+  )
+
+  const clearWechatPayment = useCallback(() => setWechatPayment(null), [])
+
   return {
     amount,
     calculating,
     processing,
+    wechatPayment,
     calculatePaymentAmount,
     processPayment,
+    processWechatPayment,
+    clearWechatPayment,
     setAmount,
   }
 }

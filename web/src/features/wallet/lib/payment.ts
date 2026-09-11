@@ -93,10 +93,18 @@ export function isWaffoPancakePayment(paymentType: string): boolean {
   return paymentType === PAYMENT_TYPES.WAFFO_PANCAKE
 }
 
+/**
+ * Check if payment method is WeChat Native direct payment
+ */
+export function isWechatPayment(paymentType: string): boolean {
+  return paymentType === PAYMENT_TYPES.WECHAT_DIRECT
+}
+
 export interface PaymentProcessors {
   regular: (topupAmount: number, paymentType: string) => Promise<boolean>
   waffo: (topupAmount: number, payMethodIndex: number) => Promise<boolean>
   waffoPancake: (topupAmount: number) => Promise<boolean>
+  wechat?: (topupAmount: number, paymentType: string) => Promise<boolean>
 }
 
 export async function dispatchSelectedPayment(
@@ -105,6 +113,13 @@ export async function dispatchSelectedPayment(
   waffoMethodIndex: number | null,
   processors: PaymentProcessors
 ): Promise<boolean> {
+  if (isWechatPayment(paymentMethod.type)) {
+    if (!processors.wechat) {
+      return false
+    }
+    return processors.wechat(topupAmount, paymentMethod.type)
+  }
+
   if (isWaffoPayment(paymentMethod.type)) {
     if (waffoMethodIndex === null) {
       return false

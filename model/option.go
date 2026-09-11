@@ -472,6 +472,22 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.CreemTestMode = value == "true"
 	case "CreemWebhookSecret":
 		setting.CreemWebhookSecret = value
+	case "WechatPayEnabled":
+		setting.WechatPayEnabled = value == "true"
+	case "WechatMchId":
+		setting.WechatMchId = value
+	case "WechatAppId":
+		setting.WechatAppId = value
+	case "WechatCertSerial":
+		setting.WechatCertSerial = value
+	case "WechatPrivateKey":
+		setting.WechatPrivateKey = value
+	case "WechatApiV3Key":
+		setting.WechatApiV3Key = value
+	case "WechatPlatformCert":
+		setting.WechatPlatformCert = value
+	case "WechatMinTopUp":
+		setting.WechatMinTopUp, _ = strconv.Atoi(value)
 	case "WaffoEnabled":
 		setting.WaffoEnabled = value == "true"
 	case "WaffoApiKey":
