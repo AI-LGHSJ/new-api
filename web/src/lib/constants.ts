@@ -22,7 +22,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 // System Configuration Defaults
 export const DEFAULT_SYSTEM_NAME = 'AI灵感绘'
-export const DEFAULT_LOGO = '/logo.png'
+export const DEFAULT_LOGO = '/logo.png?v=2'
 
 // LocalStorage Keys
 export const STORAGE_KEYS = {
